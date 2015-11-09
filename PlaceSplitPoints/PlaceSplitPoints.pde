@@ -65,7 +65,7 @@ void writeToFile(){
    //Write to file
    PrintWriter out;
    try{
-     out = new PrintWriter("H:\\CSCE_482\\COVE\\PlaceSplitPoints\\test.objl");
+     out = new PrintWriter("H:\\CSCE_482\\COVE\\PlaceSplitPoints\\teapot.objl");
      int count = 1;
      for(int i = 0; i < new_vertex_list.size(); i++){
         for(int j = 0; j < new_vertex_list.get(i).size(); j++){
@@ -112,12 +112,12 @@ void setup()
   x_pos = y_pos = z_pos = 0;
   x_rot = y_rot = z_rot = 0;
   radius = 5;
-  s = loadShape("test.obj");
+  s = loadShape("teapot.obj");
   point_list.add(new SplitPoint(0, 0, 0));
   boolean not_done = true;
   Scanner scan;
   BufferedReader reader;
-  reader = createReader("test.obj");
+  reader = createReader("teapot.obj");
   String line;
   int l = 1;
   while(not_done){
@@ -155,9 +155,12 @@ void setup()
 void keyPressed(){
   switch(key){
     case 9  : index = (index+1) % point_list.size(); break;    //tab 
-    case 32 : point_list.add(new SplitPoint(0, 0, 0));         //spacebar
-              index = point_list.size() - 1;
-              break;
+    case 32 :                                                  //spacebar
+      if(index == point_list.size() - 1){
+        point_list.add(new SplitPoint(0, 0, 0));
+      }
+      index = point_list.size() - 1;
+      break;
     case 49 : writeToFile(); break;                            //1
   }
 }
@@ -189,6 +192,7 @@ void draw(){
       case 122: radius = max(1, radius - .2); break;           //z
     }
   }
+  translate(400, 400, 400);
   translate(x_pos, y_pos, z_pos);
   rotateX(radians(x_rot));
   rotateY(radians(y_rot));
@@ -208,6 +212,32 @@ void draw(){
     translate(point_list.get(i).x_pos, point_list.get(i).y_pos, point_list.get(i).z_pos);
     sphere(radius);
     popMatrix();
+  }
+
+  for(int i = 0; i < vertex_list.size(); i++){
+      double min_distance = Double.POSITIVE_INFINITY;
+      double cur_distance;
+      int min_point = 0;
+      for(int j = 0; j < point_list.size() - 1; j++){
+          cur_distance = Math.sqrt( 
+             Math.pow(point_list.get(j).x_pos - vertex_list.get(i).x_pos , 2) +
+             Math.pow(point_list.get(j).y_pos - vertex_list.get(i).y_pos , 2) +
+             Math.pow(point_list.get(j).z_pos - vertex_list.get(i).z_pos , 2));
+          if(cur_distance < min_distance){
+             min_distance = cur_distance;
+             min_point = j;
+          }
+      }
+      pushMatrix();
+      switch(min_point){
+         case 0: fill(255, 0, 0); break;
+         case 1: fill(0, 255, 0); break;
+         case 2: fill(0, 0, 255); break;
+         default: fill(0, 0, 0); break;
+      }
+      translate(vertex_list.get(i).x_pos, vertex_list.get(i).y_pos, vertex_list.get(i).z_pos);
+      sphere(1);
+      popMatrix();
   }
   noStroke();
 }
