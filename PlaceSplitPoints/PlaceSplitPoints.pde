@@ -42,7 +42,7 @@ PShape s;
 
 void writeToFile(){
    //Arrange vertices to split
-   for(int i = 0; i < point_list.size(); i++){
+   for(int i = 0; i < point_list.size() - 1; i++){
       new_vertex_list.add(new ArrayList<OBJVertex>()); 
    }
    for(int i = 0; i < vertex_list.size(); i++){
@@ -65,11 +65,11 @@ void writeToFile(){
    //Write to file
    PrintWriter out;
    try{
-     out = new PrintWriter("H:\\CSCE_482\\ProjectTesting\\PlaceSplitPoints\\test.objl");
+     out = new PrintWriter("H:\\CSCE_482\\COVE\\PlaceSplitPoints\\test.objl");
      int count = 1;
      for(int i = 0; i < new_vertex_list.size(); i++){
         for(int j = 0; j < new_vertex_list.get(i).size(); j++){
-            vertex_list.get(new_vertex_list.get(i).get(j).o_pos).n_pos = count;
+            vertex_list.get(new_vertex_list.get(i).get(j).o_pos - 1).n_pos = count;
             count++;
             out.println("v " + new_vertex_list.get(i).get(j).x_pos + " " 
                              + new_vertex_list.get(i).get(j).y_pos + " " 
@@ -78,9 +78,22 @@ void writeToFile(){
      }
      out.println("");
      for(int i = 0; i < face_list.size(); i++){
-        out.println("f " + vertex_list.get(vertex_list.get(face_list.get(i).v1).n_pos) + " " 
-                         + vertex_list.get(vertex_list.get(face_list.get(i).v2).n_pos) + " "
-                         + vertex_list.get(vertex_list.get(face_list.get(i).v3).n_pos)); 
+        out.println("f " + vertex_list.get(face_list.get(i).v1 - 1).n_pos + " " 
+                         + vertex_list.get(face_list.get(i).v2 - 1).n_pos + " "
+                         + vertex_list.get(face_list.get(i).v3 - 1).n_pos); 
+     }
+     out.println("");
+     count = 0;
+     for(int i = 0; i < new_vertex_list.size(); i++){
+        out.println("d " + "Test" + i);
+        count += new_vertex_list.get(i).size();
+        out.println("d " + count);
+     }
+     out.println("");
+     for(int i = 0; i < point_list.size() - 1; i++){
+        out.println("p " + point_list.get(i).x_pos + " "
+                         + point_list.get(i).y_pos + " "
+                         + point_list.get(i).z_pos);
      }
      out.close();
    } catch(IOException e){
