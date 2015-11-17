@@ -25,10 +25,12 @@ public class OBJFace{
 
 public class SplitPoint {
    public float x_pos, y_pos, z_pos;
+   public String label;
    public SplitPoint(float x, float y, float z){
      x_pos = x;
      y_pos = y;
      z_pos = z;
+     label = "Test";
    }
 }
 
@@ -38,6 +40,10 @@ ArrayList<OBJFace> face_list;
 ArrayList<ArrayList<OBJVertex>> new_vertex_list;
 float x_pos, y_pos, z_pos, x_rot, y_rot, z_rot, radius;
 int index;
+boolean show_vertex;
+String obj_file;
+String label_file;
+boolean place_mode;                      //if false, label mode
 PShape s;
 
 void writeToFile(){
@@ -65,7 +71,8 @@ void writeToFile(){
    //Write to file
    PrintWriter out;
    try{
-     out = new PrintWriter("H:\\CSCE_482\\COVE\\PlaceSplitPoints\\teapot.objl");
+     //out = new PrintWriter(obj_file + ".objl");
+     out = new PrintWriter("H:\\CSCE_482\\COVE\\PlaceSplitPoints\\" + obj_file + ".objl");
      int count = 1;
      for(int i = 0; i < new_vertex_list.size(); i++){
         for(int j = 0; j < new_vertex_list.get(i).size(); j++){
@@ -85,7 +92,7 @@ void writeToFile(){
      out.println("");
      count = 0;
      for(int i = 0; i < new_vertex_list.size(); i++){
-        out.println("d " + "Test" + i);
+        out.println("d " + point_list.get(i).label);
         count += new_vertex_list.get(i).size();
         out.println("d " + count);
      }
@@ -104,20 +111,27 @@ void writeToFile(){
 void setup()
 {
   point_list = new ArrayList<SplitPoint>();
+  point_list.add(new SplitPoint(0, 0, 0));
   vertex_list = new ArrayList<OBJVertex>();
   new_vertex_list = new ArrayList<ArrayList<OBJVertex>>();
   face_list = new ArrayList<OBJFace>();
   size(800,800,P3D);
   index = 0;
   x_pos = y_pos = z_pos = 0;
-  x_rot = y_rot = z_rot = 0;
+  x_rot = 180;
+  y_rot = z_rot = 0;
   radius = 5;
-  s = loadShape("teapot.obj");
-  point_list.add(new SplitPoint(0, 0, 0));
+  show_vertex = false;
+  place_mode = true;
+  
+  obj_file = "teapot";
+  label_file = "teapot.ld";
+  s = loadShape(obj_file + ".obj");
+  
   boolean not_done = true;
   Scanner scan;
   BufferedReader reader;
-  reader = createReader("teapot.obj");
+  reader = createReader(obj_file + ".obj");
   String line;
   int l = 1;
   while(not_done){
@@ -153,91 +167,241 @@ void setup()
 }
 
 void keyPressed(){
-  switch(key){
-    case 9  : index = (index+1) % point_list.size(); break;    //tab 
-    case 32 :                                                  //spacebar
-      if(index == point_list.size() - 1){
-        point_list.add(new SplitPoint(0, 0, 0));
-      }
-      index = point_list.size() - 1;
-      break;
-    case 49 : writeToFile(); break;                            //1
+  if(place_mode){
+    switch(key){
+      case 9  : index = (index+1) % point_list.size(); break;    //tab 
+      case 32 :                                                  //spacebar
+        if(index == point_list.size() - 1){
+          point_list.add(new SplitPoint(0, 0, 0));
+        }
+        index = point_list.size() - 1;
+        break;
+      case 49 : writeToFile(); break;                            //1
+      case 50 : show_vertex = !show_vertex; break;               //2
+      case 51 :                                                  //3
+        if(point_list.size() > 1){
+          place_mode = !place_mode;
+          index = 0;
+        }
+        break;
+    }
+  } else {
+    switch(key){
+      case 9  : index = (index+1) % (point_list.size() - 1); break;    //tab 
+      case 49 : writeToFile(); break;                            //1
+      case 50 : show_vertex = !show_vertex; break;               //2
+      case 51 : place_mode = !place_mode;                        //3
+        index = point_list.size() - 1;
+        break;
+    }
   }
 }
 
 void draw(){
   background(204);
   lights();
-  if(keyPressed == true) {
-    switch(key){
-      case 97 : point_list.get(index).x_pos -= 2; break;       //a
-      case 100: point_list.get(index).x_pos += 2; break;       //d
-      case 101: point_list.get(index).z_pos += 2; break;       //e
-      case 102: x_pos -= 2; break;                             //f
-      case 103: y_pos -= 2; break;                             //g
-      case 104: x_pos += 2; break;                             //h
-      case 105: x_rot += 2; break;                             //i
-      case 106: z_rot -= 2; break;                             //j
-      case 107: x_rot -= 2; break;                             //k
-      case 108: z_rot += 2; break;                             //l
-      case 111: y_rot += 2; break;                             //o
-      case 113: point_list.get(index).z_pos -= 2; break;       //q
-      case 114: z_pos -= 2; break;                             //r
-      case 115: point_list.get(index).y_pos += 2; break;       //s
-      case 116: y_pos += 2; break;                             //t
-      case 117: y_rot -= 2; break;                             //u
-      case 119: point_list.get(index).y_pos -= 2; break;       //w
-      case 120: radius += .2; break;                           //x
-      case 121: z_pos += 2; break;                             //y
-      case 122: radius = max(1, radius - .2); break;           //z
-    }
-  }
-  translate(400, 400, 400);
-  translate(x_pos, y_pos, z_pos);
-  rotateX(radians(x_rot));
-  rotateY(radians(y_rot));
-  rotateZ(radians(z_rot));
-  shape(s);
-  for(int i = 0; i < point_list.size(); i++) {
-    pushMatrix();
-    if(i < point_list.size() - 1){
-       fill(20, 20, 100); 
-    }
-    if(i == point_list.size() - 1){
-       fill(100, 20, 20); 
-    }
-    if(i == index){
-       fill(20, 100, 20);
-    }
-    translate(point_list.get(i).x_pos, point_list.get(i).y_pos, point_list.get(i).z_pos);
-    sphere(radius);
-    popMatrix();
-  }
-
-  for(int i = 0; i < vertex_list.size(); i++){
-      double min_distance = Double.POSITIVE_INFINITY;
-      double cur_distance;
-      int min_point = 0;
-      for(int j = 0; j < point_list.size() - 1; j++){
-          cur_distance = Math.sqrt( 
-             Math.pow(point_list.get(j).x_pos - vertex_list.get(i).x_pos , 2) +
-             Math.pow(point_list.get(j).y_pos - vertex_list.get(i).y_pos , 2) +
-             Math.pow(point_list.get(j).z_pos - vertex_list.get(i).z_pos , 2));
-          if(cur_distance < min_distance){
-             min_distance = cur_distance;
-             min_point = j;
-          }
+  pushMatrix();
+  if(place_mode){
+    if(keyPressed == true) {
+      switch(key){
+        case 97 :                                                //a
+          point_list.get(index).x_pos -= 2 * cos(radians(y_rot)) * cos(radians(z_rot));//
+          point_list.get(index).y_pos -= 2 * sin(radians(x_rot)) * sin(radians(z_rot));
+          point_list.get(index).z_pos += 2 * sin(radians(x_rot)) * sin(radians(y_rot));
+          break;
+        case 100:                                                //d
+          point_list.get(index).x_pos += 2 * cos(radians(y_rot)) * cos(radians(z_rot));//
+          point_list.get(index).y_pos += 2 * sin(radians(x_rot)) * sin(radians(z_rot));
+          point_list.get(index).z_pos -= 2 * sin(radians(x_rot)) * sin(radians(y_rot));
+          break;
+        case 101:                                                //e
+          point_list.get(index).x_pos -= 2; 
+          point_list.get(index).y_pos -= 2;
+          point_list.get(index).z_pos -= 2;//
+          break;
+        case 102: x_pos -= 2; break;                             //f
+        case 103: y_pos += 2; break;                             //g
+        case 104: x_pos += 2; break;                             //h
+        case 105: x_rot += 2; break;                             //i
+        case 106: z_rot -= 2; break;                             //j
+        case 107: x_rot -= 2; break;                             //k
+        case 108: z_rot += 2; break;                             //l
+        case 111: y_rot += 2; break;                             //o
+        case 113:                                                //q
+          point_list.get(index).x_pos -= 2; 
+          point_list.get(index).y_pos -= 2;
+          point_list.get(index).z_pos += 2;//
+          break;
+        case 114: z_pos -= 2; break;                             //r
+        case 115:                                                //s
+          point_list.get(index).x_pos -= 2; 
+          point_list.get(index).y_pos += 2;//
+          point_list.get(index).z_pos -= 2;
+          break;
+        case 116: y_pos -= 2; break;                             //t
+        case 117: y_rot -= 2; break;                             //u
+        case 119:                                                //w
+          point_list.get(index).x_pos -= 2; 
+          point_list.get(index).y_pos -= 2;//
+          point_list.get(index).z_pos -= 2;
+          break;
+        case 120: radius += .2; break;                           //x
+        case 121: z_pos += 2; break;                             //y
+        case 122: radius = max(1, radius - .2); break;           //z
       }
+    }
+    translate(400, 400, 400);
+    translate(x_pos, y_pos, z_pos);
+    rotateX(radians(x_rot));
+    rotateY(radians(y_rot));
+    rotateZ(radians(z_rot));
+    shape(s);
+    for(int i = 0; i < point_list.size(); i++) {
       pushMatrix();
-      switch(min_point){
-         case 0: fill(255, 0, 0); break;
-         case 1: fill(0, 255, 0); break;
-         case 2: fill(0, 0, 255); break;
-         default: fill(0, 0, 0); break;
+      if(show_vertex){
+        switch(i){
+             case 0: fill(255, 0, 0); break;
+             case 1: fill(0, 255, 0); break;
+             case 2: fill(0, 0, 255); break;
+             case 3: fill(255, 255, 0); break;
+             case 4: fill(255, 0, 255); break;
+             case 5: fill(0, 255, 255); break;
+             case 6: fill(255, 255, 255); break;
+             default: fill(0, 0, 0); break;
+        }
+      } else if(i < point_list.size() - 1){
+         fill(20, 20, 100); 
       }
-      translate(vertex_list.get(i).x_pos, vertex_list.get(i).y_pos, vertex_list.get(i).z_pos);
-      sphere(1);
+      if(i == point_list.size() - 1){
+         fill(100, 20, 20); 
+      }
+      if(i == index){
+         fill(20, 100, 20);
+      }
+      translate(point_list.get(i).x_pos, point_list.get(i).y_pos, point_list.get(i).z_pos);
+      sphere(radius);
       popMatrix();
+    }
+    if(show_vertex){
+      for(int i = 0; i < vertex_list.size(); i++){
+          double min_distance = Double.POSITIVE_INFINITY;
+          double cur_distance;
+          int min_point = 0;
+          for(int j = 0; j < point_list.size() - 1; j++){
+              cur_distance = Math.sqrt( 
+                 Math.pow(point_list.get(j).x_pos - vertex_list.get(i).x_pos , 2) +
+                 Math.pow(point_list.get(j).y_pos - vertex_list.get(i).y_pos , 2) +
+                 Math.pow(point_list.get(j).z_pos - vertex_list.get(i).z_pos , 2));
+              if(cur_distance < min_distance){
+                 min_distance = cur_distance;
+                 min_point = j;
+              }
+          }
+          pushMatrix();
+          switch(min_point){
+             case 0: fill(255, 0, 0); break;
+             case 1: fill(0, 255, 0); break;
+             case 2: fill(0, 0, 255); break;
+             case 3: fill(255, 255, 0); break;
+             case 4: fill(255, 0, 255); break;
+             case 5: fill(0, 255, 255); break;
+             case 6: fill(255, 255, 255); break;
+             default: fill(0, 0, 0); break;
+          }
+          translate(vertex_list.get(i).x_pos, vertex_list.get(i).y_pos, vertex_list.get(i).z_pos);
+          sphere(1);
+          popMatrix();
+      }
+    }
+  } else {
+    if(keyPressed == true) {
+      switch(key){
+        //case 97 : point_list.get(index).x_pos -= 2; break;     //a
+        //case 100: point_list.get(index).x_pos += 2; break;     //d
+        //case 101: point_list.get(index).z_pos += 2; break;     //e
+        case 102: x_pos -= 2; break;                             //f
+        case 103: y_pos += 2; break;                             //g
+        case 104: x_pos += 2; break;                             //h
+        case 105: x_rot += 2; break;                             //i
+        case 106: z_rot -= 2; break;                             //j
+        case 107: x_rot -= 2; break;                             //k
+        case 108: z_rot += 2; break;                             //l
+        case 111: y_rot += 2; break;                             //o
+        //case 113: point_list.get(index).z_pos -= 2; break;     //q
+        case 114: z_pos -= 2; break;                             //r
+        //case 115: point_list.get(index).y_pos -= 2; break;     //s
+        case 116: y_pos -= 2; break;                             //t
+        case 117: y_rot -= 2; break;                             //u
+        //case 119: point_list.get(index).y_pos += 2; break;     //w
+        case 120: radius += .2; break;                           //x
+        case 121: z_pos += 2; break;                             //y
+        case 122: radius = max(1, radius - .2); break;           //z
+      }
+    }
+    translate(400, 400, 400);
+    translate(x_pos, y_pos, z_pos);
+    rotateX(radians(x_rot));
+    rotateY(radians(y_rot));
+    rotateZ(radians(z_rot));
+    shape(s);
+    for(int i = 0; i < point_list.size() - 1; i++) {
+      pushMatrix();
+      if(show_vertex){
+        switch(i){
+             case 0: fill(255, 0, 0); break;
+             case 1: fill(0, 255, 0); break;
+             case 2: fill(0, 0, 255); break;
+             case 3: fill(255, 255, 0); break;
+             case 4: fill(255, 0, 255); break;
+             case 5: fill(0, 255, 255); break;
+             case 6: fill(255, 255, 255); break;
+             default: fill(0, 0, 0); break;
+        }
+      } else if(i < point_list.size() - 1){
+         fill(20, 20, 100); 
+      }
+      if(i == point_list.size() - 1){
+         fill(100, 20, 20); 
+      }
+      if(i == index){
+         fill(20, 100, 20);
+      }
+      translate(point_list.get(i).x_pos, point_list.get(i).y_pos, point_list.get(i).z_pos);
+      sphere(radius);
+      popMatrix();
+    }
+    if(show_vertex){
+      for(int i = 0; i < vertex_list.size(); i++){
+          double min_distance = Double.POSITIVE_INFINITY;
+          double cur_distance;
+          int min_point = 0;
+          for(int j = 0; j < point_list.size() - 1; j++){
+              cur_distance = Math.sqrt( 
+                 Math.pow(point_list.get(j).x_pos - vertex_list.get(i).x_pos , 2) +
+                 Math.pow(point_list.get(j).y_pos - vertex_list.get(i).y_pos , 2) +
+                 Math.pow(point_list.get(j).z_pos - vertex_list.get(i).z_pos , 2));
+              if(cur_distance < min_distance){
+                 min_distance = cur_distance;
+                 min_point = j;
+              }
+          }
+          pushMatrix();
+          switch(min_point){
+             case 0: fill(255, 0, 0); break;
+             case 1: fill(0, 255, 0); break;
+             case 2: fill(0, 0, 255); break;
+             case 3: fill(255, 255, 0); break;
+             case 4: fill(255, 0, 255); break;
+             case 5: fill(0, 255, 255); break;
+             case 6: fill(255, 255, 255); break;
+             default: fill(0, 0, 0); break;
+          }
+          translate(vertex_list.get(i).x_pos, vertex_list.get(i).y_pos, vertex_list.get(i).z_pos);
+          sphere(1);
+          popMatrix();
+      }
+    }
   }
+  popMatrix();
   noStroke();
 }
