@@ -1,6 +1,7 @@
 import java.util.*;
 import java.io.*;
 import java.lang.*;
+import controlP5.*;
 
 public class OBJVertex{
    public float x_pos, y_pos, z_pos;
@@ -71,8 +72,8 @@ void writeToFile(){
    //Write to file
    PrintWriter out;
    try{
-     //out = new PrintWriter(obj_file + ".objl");
-     out = new PrintWriter("H:\\CSCE_482\\COVE\\PlaceSplitPoints\\" + obj_file + ".objl");
+     out = new PrintWriter(obj_file + ".objl");
+     //out = new PrintWriter("H:\\CSCE_482\\COVE\\PlaceSplitPoints\\" + obj_file + ".objl");
      int count = 1;
      for(int i = 0; i < new_vertex_list.size(); i++){
         for(int j = 0; j < new_vertex_list.get(i).size(); j++){
@@ -80,7 +81,8 @@ void writeToFile(){
             count++;
             out.println("v " + new_vertex_list.get(i).get(j).x_pos + " " 
                              + new_vertex_list.get(i).get(j).y_pos + " " 
-                             + new_vertex_list.get(i).get(j).z_pos);
+                             + new_vertex_list.get(i).get(j).z_pos + " "
+                             + new_vertex_list.get(i).get(j).o_pos);
         }
      }
      out.println("");
@@ -124,8 +126,8 @@ void setup()
   show_vertex = false;
   place_mode = true;
   
-  obj_file = "teapot";
-  label_file = "teapot.ld";
+  obj_file = "H:\\CSCE_482\\COVE\\PlaceSplitPoints\\teapot";
+  label_file = "H:\\CSCE_482\\COVE\\PlaceSplitPoints\\teapot.ld";
   s = loadShape(obj_file + ".obj");
   
   boolean not_done = true;
@@ -145,9 +147,9 @@ void setup()
         break; 
      } else{
         float x, y , z;
-        int i, j, k;
+        int i = 0, j = 0, k = 0;
         if(line.length() > 2){
-          if(line.charAt(0) == 'v' && line.charAt(1) != 'n'){
+          if(line.charAt(0) == 'v' && line.charAt(1) != 'n' && line.charAt(1) != 't'){
               scan = new Scanner(line.substring(1));
               x = scan.nextFloat();
               y = scan.nextFloat();
@@ -155,11 +157,40 @@ void setup()
               vertex_list.add(new OBJVertex(x, y, z, l));
               l++;
           } else if(line.charAt(0) == 'f'){
-              scan = new Scanner(line.substring(1));
-              i = scan.nextInt();
-              j = scan.nextInt();
-              k = scan.nextInt();
-              face_list.add(new OBJFace(i, j, k));
+              int dummy_count = 0;
+              int start = 0;
+              int end = 0;
+              boolean v_start = true;
+              for(int a = 1; a < line.length(); a++){
+                 if((!Character.isDigit( line.charAt(a)) || a == line.length() - 1) && start != 0){
+                    end = a;
+                    String s = line.substring(start, end);
+                    switch(dummy_count){
+                       case 0: i = Integer.parseInt(s); break;
+                       case 1: j = Integer.parseInt(s); break;
+                       case 2: k = Integer.parseInt(s); break;
+                    }
+                    dummy_count++;
+                    start = 0;
+                    end = 0;
+                    v_start = false;
+                 }
+                 if(Character.isDigit(line.charAt(a)) && v_start){
+                    start = a;
+                 }
+                 if(line.charAt(a) == ' '){
+                    v_start = true;
+                 }
+              }
+              if(i != 0 && j != 0 && k != 0){
+                face_list.add(new OBJFace(i, j, k));
+              } else{
+                scan = new Scanner(line.substring(2));
+                i = scan.nextInt();
+                j = scan.nextInt();
+                k = scan.nextInt();
+                face_list.add(new OBJFace(i, j, k));
+              }
           }
         }
      }
@@ -204,21 +235,9 @@ void draw(){
   if(place_mode){
     if(keyPressed == true) {
       switch(key){
-        case 97 :                                                //a
-          point_list.get(index).x_pos -= 2 * cos(radians(y_rot)) * cos(radians(z_rot));//
-          point_list.get(index).y_pos -= 2 * sin(radians(x_rot)) * sin(radians(z_rot));
-          point_list.get(index).z_pos += 2 * sin(radians(x_rot)) * sin(radians(y_rot));
-          break;
-        case 100:                                                //d
-          point_list.get(index).x_pos += 2 * cos(radians(y_rot)) * cos(radians(z_rot));//
-          point_list.get(index).y_pos += 2 * sin(radians(x_rot)) * sin(radians(z_rot));
-          point_list.get(index).z_pos -= 2 * sin(radians(x_rot)) * sin(radians(y_rot));
-          break;
-        case 101:                                                //e
-          point_list.get(index).x_pos -= 2; 
-          point_list.get(index).y_pos -= 2;
-          point_list.get(index).z_pos -= 2;//
-          break;
+        case 97 : point_list.get(index).x_pos -= 2; break;       //a
+        case 100: point_list.get(index).x_pos += 2; break;       //d
+        case 101: point_list.get(index).z_pos += 2; break;       //e
         case 102: x_pos -= 2; break;                             //f
         case 103: y_pos += 2; break;                             //g
         case 104: x_pos += 2; break;                             //h
@@ -227,24 +246,12 @@ void draw(){
         case 107: x_rot -= 2; break;                             //k
         case 108: z_rot += 2; break;                             //l
         case 111: y_rot += 2; break;                             //o
-        case 113:                                                //q
-          point_list.get(index).x_pos -= 2; 
-          point_list.get(index).y_pos -= 2;
-          point_list.get(index).z_pos += 2;//
-          break;
+        case 113: point_list.get(index).z_pos -= 2; break;       //q
         case 114: z_pos -= 2; break;                             //r
-        case 115:                                                //s
-          point_list.get(index).x_pos -= 2; 
-          point_list.get(index).y_pos += 2;//
-          point_list.get(index).z_pos -= 2;
-          break;
+        case 115: point_list.get(index).y_pos -= 2; break;       //s
         case 116: y_pos -= 2; break;                             //t
         case 117: y_rot -= 2; break;                             //u
-        case 119:                                                //w
-          point_list.get(index).x_pos -= 2; 
-          point_list.get(index).y_pos -= 2;//
-          point_list.get(index).z_pos -= 2;
-          break;
+        case 119: point_list.get(index).y_pos += 2; break;       //w
         case 120: radius += .2; break;                           //x
         case 121: z_pos += 2; break;                             //y
         case 122: radius = max(1, radius - .2); break;           //z
