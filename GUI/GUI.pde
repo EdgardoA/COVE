@@ -242,9 +242,7 @@ void objSelected(File obj) {
 void evalSelected(File eval) {
   if (eval == null) {
     println("Window was closed or the user hit cancel.");
-    LABEL.hide();
-    labelLabel.hide();
-    MKLABEL.hide();
+ 
   } else {
     println("User selected " + eval.getAbsolutePath());
     evalfile = eval.getName();
@@ -257,8 +255,8 @@ void evalSelected(File eval) {
   for (int i = 0 ; i < lines.length; i++) {
   println(lines[i]);
   }
-  functions = setFunctions(lines);
-  functionsList.addItems(functions);
+  //functions = setFunctions(lines);
+  //functionsList.addItems(functions);
 }
 
 //Load function - LABEL file
@@ -277,8 +275,8 @@ void labelSelected(File label) {
     println(labelInput[i]);
     }
     //labels = setLabels(labelInput); //setLabels function not in use
-    selectedList.addItems(labelInput);
-    selectedList.setSize(200,(20*labelInput.length + 20)); //Expand list to show everything
+    //selectedList.addItems(labelInput);
+    //selectedList.setSize(200,(20*labelInput.length + 20)); //Expand list to show everything
     
     
   }
