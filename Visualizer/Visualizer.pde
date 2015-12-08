@@ -99,56 +99,7 @@ public void MOVERIGHT(){
 }
 
 public void SAVE(){
-  textSize(32);
-  fill(0, 102, 255);
-  text("Modified", 20, 20);
-  
-  o.setVisible(false); //Show Modified
-  
-  xVal=0;
-  yVal=0;
-  
-  xVal=90;
-  rotXval = radians(xVal) * PI;
-  
-  //redraw();
-  
-  saveFrame("view1.png");
-  
-  //redraw();
-  
-  xVal=-90;
-  rotXval = radians(xVal) * PI;
-  
-  //redraw();
-  saveFrame("view2.png");
-  //redraw();
-  
-  yVal=90;
-  rotYval = radians(yVal) * PI;
-  
-  //redraw();
-  saveFrame("view3.png");
-  //redraw();
-  
-  yVal=-90;
-  rotYval = radians(yVal) * PI;
-  
-  //redraw();
-  saveFrame("view4.png");
-  //redraw();
-  
-  zoomFactor=-200;
-  
-  //redraw();
-  saveFrame("view5.png");
-  //redraw();
-  
-  zoomFactor=50;
-  
-  //redraw();
-  saveFrame("view6.png");
-  //redraw();
+  saveFrame("still-####.png");
 }
 
 void draw(){
@@ -165,7 +116,7 @@ void draw(){
     lightSpecular(156, 255, 204);
    
     //Center Right for Modified
-    translate(width/2 + 150 + displacement, height/2, zoomFactor); 
+    translate(width/2 + 200 + displacement, height/2, zoomFactor); 
    
     rotateX(rotXval);
     rotateY(rotYval);
@@ -173,9 +124,6 @@ void draw(){
     //Keyboard Functionality
     if(keyPressed == true) {
       switch(key){
-        case 49:   // 1 - Save Image
-          SAVE();
-          break;
         case 119:  // w - Rotate UP - X Axis
           ROTATEB();
           break; 
@@ -212,7 +160,7 @@ void draw(){
   pushMatrix();
     
     //Center Left for Original
-    translate(width/2 - 150 + displacement, height/2, zoomFactor); 
+    translate(width/2 - 200 + displacement, height/2, zoomFactor); 
    
     rotateX(rotXval);
     rotateY(rotYval);
@@ -220,9 +168,6 @@ void draw(){
     //Keyboard Functionality
     if(keyPressed == true) {
       switch(key){
-        case 49:   // 1 - Save Image
-          saveFrame("test-####.png");
-          break;
         case 119:  // w - Rotate UP - X Axis
           ROTATEB();
           break; 
@@ -247,5 +192,19 @@ void draw(){
     shape(o);
     
   popMatrix();
+  
+  //Keyboard Functionality
+    if(keyPressed == true) {
+      switch(key){
+        case 49:   // 1
+          textSize(32);
+          fill(0, 102, 255);
+          text("Modified", 650, 20);
+          text("Original", 50, 20);
+          saveFrame("comparison.png");
+          break;
+      }
+      
+    }  
   
 }
