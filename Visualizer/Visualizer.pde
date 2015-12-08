@@ -11,14 +11,14 @@ import controlP5.*;
 ControlP5 cp5;
 
 Button SAVE;
-Toggle objectToggle;
 Textarea helpLabel;
 
 boolean toggleValue = false;
 
-PShape s;
+PShape m;
 PShape o;
 int zoomFactor = 0;
+int displacement = 0;
 
 Boolean first = false;
 
@@ -31,17 +31,11 @@ void setup()
 {
   
   cp5 = new ControlP5(this);
-  
-  //Control Object
-  objectToggle = cp5.addToggle("Control Object")
-     .setPosition(25,25)
-     .setSize(75,20)
-     .hide();
-     ;
     
   //Save Frame
   SAVE = cp5.addButton("SAVE")
-    .setPosition(500,25)
+    .setCaptionLabel("CAPTURE STILL")
+    .setPosition(700,25)
     .setSize(75,20)
     ;
     
@@ -53,8 +47,8 @@ void setup()
   
   size(800,800,P3D);
   
-  s = loadShape("rocket.obj");
-  o = loadShape("teapot.obj");
+  m = loadShape("rocket.obj"); //Modified - Right
+  o = loadShape("teapot.obj"); //Original - Left
   
 }
   
@@ -92,7 +86,14 @@ public void ROTATEF(){
   rotXval = radians(xVal) * PI;
   //println("rotXval: " + rotXval);
   xVal = xVal - 1;
-  
+}
+
+public void MOVELEFT(){
+ displacement-=10; 
+}
+
+public void MOVERIGHT(){
+ displacement+=10; 
 }
 
 public void SAVE(){
@@ -113,7 +114,7 @@ void draw(){
     lightSpecular(156, 255, 204);
    
     //Center Right for Modified
-    translate(width/2 + 150, height/2, zoomFactor); 
+    translate(width/2 + 150 + displacement, height/2, zoomFactor); 
    
     rotateX(rotXval);
     rotateY(rotYval);
@@ -142,10 +143,16 @@ void draw(){
         case 101: //e - Zoom In
           ZOOM_IN();
           break;
+        case 120: //x - Right
+          MOVERIGHT();
+          break;
+        case 122: //z - Left
+          MOVELEFT();
+          break;
       }
     }
     
-    shape(s);
+    shape(m);
  
   popMatrix();
   
@@ -154,7 +161,7 @@ void draw(){
   pushMatrix();
     
     //Center Left for Original
-    translate(width/2 - 150, height/2, zoomFactor); 
+    translate(width/2 - 150 + displacement, height/2, zoomFactor); 
    
     rotateX(rotXval);
     rotateY(rotYval);
