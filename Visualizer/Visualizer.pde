@@ -1,5 +1,3 @@
-import saito.objloader.*;
-
 import java.util.*;
 import java.io.*;
 import java.lang.*;
@@ -18,6 +16,7 @@ int zoomFactor = 0;
 int displacement = 0;
 
 Boolean first = false;
+Boolean second = false;
 
 float rotXval, rotYval;
 
@@ -26,13 +25,53 @@ float yVal = 0;
 
 PImage keylay;
 
+File objO, objM;
+String objOfile, objMfile;
+
+void objOSelected(File objO) {
+  if (objO == null) {
+    //println("Window was closed or the user hit cancel.");
+  } else {
+    //println("User selected " + objO.getAbsolutePath());
+    objOfile = objO.getAbsolutePath();
+    println("File Path: " + objOfile);
+  }
+}
+
+void objMSelected(File objM) {
+  if (objM == null) {
+    //println("Window was closed or the user hit cancel.");
+  } else {
+    //println("User selected " + objO.getAbsolutePath());
+    objMfile = objM.getAbsolutePath();
+    println("File Path: " + objMfile);
+  }
+  test();
+}
+
+
 void setup()
 {
   
   cp5 = new ControlP5(this);
   
+  size(800,800,P3D);
+  
   keylay = loadImage("KeyLayout.png");
-    
+  
+  objOfile = "teapot.obj"; //loading dummy obj
+  
+  objMfile = "teapot.obj"; //loading dummy obj
+  
+  first = true;
+  
+  //if (first){
+    selectInput("Select an original obj file to load:", "objMSelected");
+    //second = true;
+  //} else if (second) {
+    selectInput("Select a modified obj file to load:", "objOSelected");
+  //}
+  
   //Save Frame
   SAVE = cp5.addButton("SAVE")
     .setCaptionLabel("CAPTURE STILL")
@@ -46,12 +85,14 @@ void setup()
     .setSize(425,281)
     .setImages(keylay, keylay, keylay)
     ;
+    
+ test();
   
-  size(800,800,P3D);
+}
   
-  m = loadShape("rocket.obj"); //Modified - Right
-  o = loadShape("teapot.obj"); //Original - Left
-  
+public void test(){
+  o = loadShape(objOfile); 
+  m = loadShape(objMfile); 
 }
   
 public void ZOOM_IN(){
@@ -68,14 +109,12 @@ public void ROTATECW(){
   rotYval = radians(yVal) * PI;
   //println("rotYval: " + rotYval);
   yVal = yVal + 1;
-
 }
 
 public void ROTATECCW(){
   rotYval = radians(yVal) * PI;
   //println("rotYval: " + rotYval);
   yVal = yVal - 1;
-  
 }
 
 public void ROTATEB(){
@@ -154,7 +193,6 @@ void draw(){
     shape(m);
  
   popMatrix();
-  
   
   //Loading Original
   pushMatrix();
