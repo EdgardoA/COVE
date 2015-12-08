@@ -1,3 +1,5 @@
+import saito.objloader.*;
+
 import java.util.*;
 import java.io.*;
 import java.lang.*;
@@ -51,44 +53,44 @@ void setup()
   
   size(800,800,P3D);
   
-  s = loadShape("teapot.obj");
+  s = loadShape("rocket.obj");
   o = loadShape("teapot.obj");
   
 }
   
 public void ZOOM_IN(){
   zoomFactor+=5;
-  println("zoomFactor: " + zoomFactor);
+  //println("zoomFactor: " + zoomFactor);
 }
 
 public void ZOOM_OUT(){
   zoomFactor-=5;
-  println("zoomFactor: " + zoomFactor);
+  //println("zoomFactor: " + zoomFactor);
 }
 
 public void ROTATECW(){
   rotYval = radians(yVal) * PI;
-  println("rotYval: " + rotYval);
+  //println("rotYval: " + rotYval);
   yVal = yVal + 1;
 
 }
 
 public void ROTATECCW(){
   rotYval = radians(yVal) * PI;
-  println("rotYval: " + rotYval);
+  //println("rotYval: " + rotYval);
   yVal = yVal - 1;
   
 }
 
 public void ROTATEB(){
   rotXval = radians(xVal) * PI;
-  println("rotXval: " + rotXval);
+  //println("rotXval: " + rotXval);
   xVal = xVal + 1;
 }
 
 public void ROTATEF(){
   rotXval = radians(xVal) * PI;
-  println("rotXval: " + rotXval);
+  //println("rotXval: " + rotXval);
   xVal = xVal - 1;
   
 }
@@ -98,16 +100,17 @@ public void SAVE(){
 }
 
 void draw(){
-  lights();
+  
   background(255); //White Background
+   lights();
  
   //Loading Modified
   pushMatrix();
   
     //Lighting Modifying Functions
-    directionalLight(102, 102, 126, 1, 0, 1);
+    directionalLight(102, 102, 126, 0, 0, 1);
     ambientLight(102, 102, 102);
-    lightSpecular(204, 255, 204);
+    lightSpecular(156, 255, 204);
    
     //Center Right for Modified
     translate(width/2 + 150, height/2, zoomFactor); 
