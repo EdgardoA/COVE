@@ -10,10 +10,7 @@ import controlP5.*;
 
 ControlP5 cp5;
 
-Button SAVE;
-Textarea helpLabel;
-
-boolean toggleValue = false;
+Button SAVE, KEY;
 
 PShape m;
 PShape o;
@@ -27,10 +24,14 @@ float rotXval, rotYval;
 float xVal = 0;
 float yVal = 0;
 
+PImage keylay;
+
 void setup()
 {
   
   cp5 = new ControlP5(this);
+  
+  keylay = loadImage("KeyLayout.png");
     
   //Save Frame
   SAVE = cp5.addButton("SAVE")
@@ -39,10 +40,11 @@ void setup()
     .setSize(75,20)
     ;
     
-  helpLabel = cp5.addTextarea("help")
-    .setText("Use W,A,S,D, keys to rotate the object. Q&E to zoom in and out of the object.")
-    .setPosition(25,25)
-    .setColorValue(000000)
+  //Key Button - For loading image of keyboard
+  KEY = cp5.addButton("KEY")
+    .setPosition(0,0)
+    .setSize(425,281)
+    .setImages(keylay, keylay, keylay)
     ;
   
   size(800,800,P3D);
@@ -78,13 +80,13 @@ public void ROTATECCW(){
 
 public void ROTATEB(){
   rotXval = radians(xVal) * PI;
-  //println("rotXval: " + rotXval);
+  println("rotXval: " + rotXval + ", " + "xVal: " + xVal);
   xVal = xVal + 1;
 }
 
 public void ROTATEF(){
   rotXval = radians(xVal) * PI;
-  //println("rotXval: " + rotXval);
+  println("rotXval: " + rotXval + ", " + "xVal: " + xVal);
   xVal = xVal - 1;
 }
 
@@ -97,7 +99,56 @@ public void MOVERIGHT(){
 }
 
 public void SAVE(){
-  saveFrame("test-####.png");
+  textSize(32);
+  fill(0, 102, 255);
+  text("Modified", 20, 20);
+  
+  o.setVisible(false); //Show Modified
+  
+  xVal=0;
+  yVal=0;
+  
+  xVal=90;
+  rotXval = radians(xVal) * PI;
+  
+  //redraw();
+  
+  saveFrame("view1.png");
+  
+  //redraw();
+  
+  xVal=-90;
+  rotXval = radians(xVal) * PI;
+  
+  //redraw();
+  saveFrame("view2.png");
+  //redraw();
+  
+  yVal=90;
+  rotYval = radians(yVal) * PI;
+  
+  //redraw();
+  saveFrame("view3.png");
+  //redraw();
+  
+  yVal=-90;
+  rotYval = radians(yVal) * PI;
+  
+  //redraw();
+  saveFrame("view4.png");
+  //redraw();
+  
+  zoomFactor=-200;
+  
+  //redraw();
+  saveFrame("view5.png");
+  //redraw();
+  
+  zoomFactor=50;
+  
+  //redraw();
+  saveFrame("view6.png");
+  //redraw();
 }
 
 void draw(){
@@ -123,7 +174,7 @@ void draw(){
     if(keyPressed == true) {
       switch(key){
         case 49:   // 1 - Save Image
-          saveFrame("test-####.png");
+          SAVE();
           break;
         case 119:  // w - Rotate UP - X Axis
           ROTATEB();
