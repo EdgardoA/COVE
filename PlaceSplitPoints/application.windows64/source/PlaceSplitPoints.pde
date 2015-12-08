@@ -231,7 +231,7 @@ void loadFiles(){
                     end = 0;
                     v_start = false;
                  }
-                 if(Character.isDigit(line.charAt(a)) && v_start){
+                 if(Character.isDigit(line.charAt(a)) && v_start && start == 0){
                     start = a;
                  }
                  if(line.charAt(a) == ' '){
@@ -283,89 +283,6 @@ void setup()
   //obj_file = "H:\\CSCE_482\\COVE\\PlaceSplitPoints\\icosahedron2";
   label_file = "H:\\CSCE_482\\COVE\\PlaceSplitPoints\\teapot.ld";
   s = loadShape(obj_file);
-  
-  /*boolean not_done = true;
-  Scanner scan;
-  BufferedReader reader;
-  reader = createReader(obj_file + ".obj");
-  String line;
-  int l = 1;
-  while(not_done){
-     try{
-        line = reader.readLine();
-     } catch(IOException e){
-        e.printStackTrace();
-        line = null;
-     }
-     if(line == null){
-        break; 
-     } else{
-        float x, y , z;
-        int i = 0, j = 0, k = 0;
-        if(line.length() > 2){
-          if(line.charAt(0) == 'v' && line.charAt(1) != 'n' && line.charAt(1) != 't'){
-              scan = new Scanner(line.substring(1));
-              x = scan.nextFloat();
-              y = scan.nextFloat();
-              z = scan.nextFloat();
-              vertex_list.add(new OBJVertex(x, y, z, l));
-              l++;
-          } else if(line.charAt(0) == 'f'){
-              int dummy_count = 0;
-              int start = 0;
-              int end = 0;
-              boolean v_start = true;
-              for(int a = 1; a < line.length(); a++){
-                 if((!Character.isDigit( line.charAt(a)) || a == line.length() - 1) && start != 0){
-                    end = a;
-                    String s = line.substring(start, end);
-                    switch(dummy_count){
-                       case 0: i = Integer.parseInt(s); break;
-                       case 1: j = Integer.parseInt(s); break;
-                       case 2: k = Integer.parseInt(s); break;
-                    }
-                    dummy_count++;
-                    start = 0;
-                    end = 0;
-                    v_start = false;
-                 }
-                 if(Character.isDigit(line.charAt(a)) && v_start){
-                    start = a;
-                 }
-                 if(line.charAt(a) == ' '){
-                    v_start = true;
-                 }
-              }
-              if(i != 0 && j != 0 && k != 0){
-                face_list.add(new OBJFace(i, j, k));
-              } else{
-                scan = new Scanner(line.substring(2));
-                i = scan.nextInt();
-                j = scan.nextInt();
-                k = scan.nextInt();
-                face_list.add(new OBJFace(i, j, k));
-              }
-          }
-        }
-     }
-  }
-  reader = createReader(label_file);
-  while(not_done){
-     try{
-        line = reader.readLine();
-     } catch(IOException e){
-        e.printStackTrace();
-        line = null;
-     }
-     if(line == null){
-        break;
-     } else{
-        if(line.charAt(0) == 'l'){
-           label_list.add(line.substring(2));
-           LabelList.addItem(line.substring(2), null);
-        }
-     }
-  }*/
 }
 
 void keyPressed(){
@@ -625,9 +542,8 @@ void labelList(int n){
 //Load function - OBj file
 void objSelected(File obj) {
   if (obj == null) {
-    println("Window was closed or the user hit cancel.");
+    
   } else {
-    println("User selected " + obj.getAbsolutePath());
     obj_file = obj.getAbsolutePath();
     label_file = obj.getAbsolutePath();
     if(obj_file.charAt(obj_file.length() - 1) == 'l'){

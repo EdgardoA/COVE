@@ -117,6 +117,11 @@ void writeToFile(int n){
    } catch(IOException e){
       e.printStackTrace(); 
    }
+   /*try{
+   Runtime.getRuntime().exec("H:\\CSCE_482\\COVE\\PlaceSplitPoints\\Test\\circle_fit.exe");
+   } catch(IOException e){
+   
+   }*/
    exit();
 }
 
