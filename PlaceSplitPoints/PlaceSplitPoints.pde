@@ -27,27 +27,37 @@ public class OBJFace{
 public class SplitPoint {
    public float x_pos, y_pos, z_pos;
    public String label;
+   public int l;
    public SplitPoint(float x, float y, float z){
      x_pos = x;
      y_pos = y;
      z_pos = z;
      label = "Test";
+     l = 0;
    }
 }
 
+//Data Elements
 ArrayList<SplitPoint> point_list;
 ArrayList<OBJVertex> vertex_list;
 ArrayList<OBJFace> face_list;
 ArrayList<ArrayList<OBJVertex>> new_vertex_list;
+ArrayList<String> label_list;
 float x_pos, y_pos, z_pos, x_rot, y_rot, z_rot, radius;
-int index;
+int index, label_index;
 boolean show_vertex;
 String obj_file;
 String label_file;
+String save_file;
 boolean place_mode;                      //if false, label mode
 PShape s;
 
-void writeToFile(){
+//GUI Elements
+ControlP5 cp5;
+Button NextPoint, PrevPoint, SetLabel, SwitchMode, Save;
+ScrollableList LabelList;
+
+void writeToFile(int n){
    //Arrange vertices to split
    for(int i = 0; i < point_list.size() - 1; i++){
       new_vertex_list.add(new ArrayList<OBJVertex>()); 
@@ -72,8 +82,7 @@ void writeToFile(){
    //Write to file
    PrintWriter out;
    try{
-     out = new PrintWriter(obj_file + ".objl");
-     //out = new PrintWriter("H:\\CSCE_482\\COVE\\PlaceSplitPoints\\" + obj_file + ".objl");
+     out = new PrintWriter(save_file);
      int count = 1;
      for(int i = 0; i < new_vertex_list.size(); i++){
         for(int j = 0; j < new_vertex_list.get(i).size(); j++){
@@ -108,17 +117,151 @@ void writeToFile(){
    } catch(IOException e){
       e.printStackTrace(); 
    }
+   exit();
+}
+
+void loadFiles(){
+  boolean not_done = true;
+  Scanner scan;
+  BufferedReader reader;
+  String line;
+  
+  reader = createReader(label_file);
+  while(not_done){
+     try{
+        line = reader.readLine();
+     } catch(IOException e){
+        e.printStackTrace();
+        line = null;
+     }
+     if(line == null){
+        break;
+     } else{
+        if(line.charAt(0) == 'l'){
+           label_list.add(line.substring(2));
+           LabelList.addItem(line.substring(2), null);
+        }
+     }
+  }
+  
+  if(obj_file.charAt(obj_file.length() - 1) == 'l'){  
+    reader = createReader(obj_file);
+    boolean temp = true;
+    int l = 0;
+    float x, y, z;
+    while(true){
+       try{
+        line = reader.readLine();
+       } catch(IOException e){
+          e.printStackTrace();
+          line = null;
+       }
+       if(line == null){
+          break; 
+       } else{
+          if(line.length() > 2){
+            if(line.charAt(0) == 'd'){
+               if(temp) {
+                  SplitPoint s = new SplitPoint(0, 0, 0);
+                  s.label = line.substring(2);
+                  s.l = label_list.indexOf(line.substring(2));
+                  point_list.add(s);
+               } else {
+                  
+               }
+               temp = !temp;
+            }
+            if(line.charAt(0) == 'p'){
+               scan = new Scanner(line.substring(2));
+               x = scan.nextFloat();
+               y = scan.nextFloat();
+               z = scan.nextFloat();
+               point_list.get(l).x_pos = x;
+               point_list.get(l).y_pos = y;
+               point_list.get(l).z_pos = z;
+               l++;
+            }
+          }
+       }
+    }
+    obj_file = obj_file.substring(0, obj_file.length() - 1);
+  }
+  
+  point_list.add(new SplitPoint(0, 0, 0));
+  s = loadShape(obj_file);
+  
+  reader = createReader(obj_file);
+  int l = 1;
+  while(not_done){
+     try{
+        line = reader.readLine();
+     } catch(IOException e){
+        e.printStackTrace();
+        line = null;
+     }
+     if(line == null){
+        break; 
+     } else{
+        float x, y , z;
+        int i = 0, j = 0, k = 0;
+        if(line.length() > 2){
+          if(line.charAt(0) == 'v' && line.charAt(1) != 'n' && line.charAt(1) != 't'){
+              scan = new Scanner(line.substring(1));
+              x = scan.nextFloat();
+              y = scan.nextFloat();
+              z = scan.nextFloat();
+              vertex_list.add(new OBJVertex(x, y, z, l));
+              l++;
+          } else if(line.charAt(0) == 'f'){
+              int dummy_count = 0;
+              int start = 0;
+              int end = 0;
+              boolean v_start = true;
+              for(int a = 1; a < line.length(); a++){
+                 if((!Character.isDigit( line.charAt(a)) || a == line.length() - 1) && start != 0){
+                    end = a;
+                    String s = line.substring(start, end);
+                    switch(dummy_count){
+                       case 0: i = Integer.parseInt(s); break;
+                       case 1: j = Integer.parseInt(s); break;
+                       case 2: k = Integer.parseInt(s); break;
+                    }
+                    dummy_count++;
+                    start = 0;
+                    end = 0;
+                    v_start = false;
+                 }
+                 if(Character.isDigit(line.charAt(a)) && v_start){
+                    start = a;
+                 }
+                 if(line.charAt(a) == ' '){
+                    v_start = true;
+                 }
+              }
+              if(i != 0 && j != 0 && k != 0){
+                face_list.add(new OBJFace(i, j, k));
+              } else{
+                scan = new Scanner(line.substring(2));
+                i = scan.nextInt();
+                j = scan.nextInt();
+                k = scan.nextInt();
+                face_list.add(new OBJFace(i, j, k));
+              }
+          }
+        }
+     }
+  }
 }
 
 void setup()
 {
   point_list = new ArrayList<SplitPoint>();
-  point_list.add(new SplitPoint(0, 0, 0));
   vertex_list = new ArrayList<OBJVertex>();
   new_vertex_list = new ArrayList<ArrayList<OBJVertex>>();
   face_list = new ArrayList<OBJFace>();
+  label_list = new ArrayList<String>();
   size(800,800,P3D);
-  index = 0;
+  index = label_index = 0;
   x_pos = y_pos = z_pos = 0;
   x_rot = 180;
   y_rot = z_rot = 0;
@@ -126,11 +269,22 @@ void setup()
   show_vertex = false;
   place_mode = true;
   
-  obj_file = "H:\\CSCE_482\\COVE\\PlaceSplitPoints\\teapot";
-  label_file = "H:\\CSCE_482\\COVE\\PlaceSplitPoints\\teapot.ld";
-  s = loadShape(obj_file + ".obj");
+  cp5 = new ControlP5(this);
+  PrevPoint = cp5.addButton("PreviousPoint").setPosition(20, 20).setSize(100, 20).hide();
+  NextPoint = cp5.addButton("NextPoint").setPosition(140, 20).setSize(100, 20).hide();
+  SetLabel = cp5.addButton("SetLabel").setPosition(20, 50).setSize(100, 20).hide();
+  SwitchMode = cp5.addButton("SwitchMode").setPosition(680, 20).setSize(100, 20);
+  Save = cp5.addButton("writeToFile").setPosition(680, 760).setSize(100, 20);
+  LabelList = cp5.addScrollableList("labelList").setPosition(20, 80).setSize(100, 100)
+    .setBarHeight(20).setItemHeight(20).setType(ControlP5.LIST).hide();
   
-  boolean not_done = true;
+  obj_file = "H:\\CSCE_482\\COVE\\PlaceSplitPoints\\icosahedron2.obj";
+  selectInput("Select an .obj or .objl file to load:", "objSelected");
+  //obj_file = "H:\\CSCE_482\\COVE\\PlaceSplitPoints\\icosahedron2";
+  label_file = "H:\\CSCE_482\\COVE\\PlaceSplitPoints\\teapot.ld";
+  s = loadShape(obj_file);
+  
+  /*boolean not_done = true;
   Scanner scan;
   BufferedReader reader;
   reader = createReader(obj_file + ".obj");
@@ -195,6 +349,23 @@ void setup()
         }
      }
   }
+  reader = createReader(label_file);
+  while(not_done){
+     try{
+        line = reader.readLine();
+     } catch(IOException e){
+        e.printStackTrace();
+        line = null;
+     }
+     if(line == null){
+        break;
+     } else{
+        if(line.charAt(0) == 'l'){
+           label_list.add(line.substring(2));
+           LabelList.addItem(line.substring(2), null);
+        }
+     }
+  }*/
 }
 
 void keyPressed(){
@@ -207,7 +378,7 @@ void keyPressed(){
         }
         index = point_list.size() - 1;
         break;
-      case 49 : writeToFile(); break;                            //1
+      //case 49 : writeToFile(); break;                            //1
       case 50 : show_vertex = !show_vertex; break;               //2
       case 51 :                                                  //3
         if(point_list.size() > 1){
@@ -219,7 +390,7 @@ void keyPressed(){
   } else {
     switch(key){
       case 9  : index = (index+1) % (point_list.size() - 1); break;    //tab 
-      case 49 : writeToFile(); break;                            //1
+      //case 49 : writeToFile(); break;                            //1
       case 50 : show_vertex = !show_vertex; break;               //2
       case 51 : place_mode = !place_mode;                        //3
         index = point_list.size() - 1;
@@ -354,7 +525,7 @@ void draw(){
     for(int i = 0; i < point_list.size() - 1; i++) {
       pushMatrix();
       if(show_vertex){
-        switch(i){
+        switch(point_list.get(i).l){
              case 0: fill(255, 0, 0); break;
              case 1: fill(0, 255, 0); break;
              case 2: fill(0, 0, 255); break;
@@ -389,7 +560,8 @@ void draw(){
                  Math.pow(point_list.get(j).z_pos - vertex_list.get(i).z_pos , 2));
               if(cur_distance < min_distance){
                  min_distance = cur_distance;
-                 min_point = j;
+                 //min_point = j;
+                 min_point = point_list.get(j).l;
               }
           }
           pushMatrix();
@@ -411,4 +583,60 @@ void draw(){
   }
   popMatrix();
   noStroke();
+}
+
+void SwitchMode(int theValue){
+   place_mode = !place_mode;
+   if(place_mode){
+       index = point_list.size() - 1;
+       PrevPoint.hide();
+       NextPoint.hide();
+       SetLabel.hide();
+       LabelList.hide();
+   } else{
+       index = 0;
+       PrevPoint.show();
+       NextPoint.show();
+       SetLabel.show();
+       LabelList.show();
+   }
+}
+
+void PreviousPoint(int theValue){
+   index = (index-1);
+   if(index == -1){
+      index = point_list.size() - 2; 
+   }
+}
+
+void NextPoint(int theValue){
+   index = (index+1) % (point_list.size() - 1);
+}
+
+void SetLabel(int theValue){
+   point_list.get(index).label = label_list.get(label_index);
+   point_list.get(index).l = label_index;
+}
+
+void labelList(int n){
+   label_index = n;
+}
+
+//Load function - OBj file
+void objSelected(File obj) {
+  if (obj == null) {
+    println("Window was closed or the user hit cancel.");
+  } else {
+    println("User selected " + obj.getAbsolutePath());
+    obj_file = obj.getAbsolutePath();
+    label_file = obj.getAbsolutePath();
+    if(obj_file.charAt(obj_file.length() - 1) == 'l'){
+      label_file = obj_file.substring(0, obj_file.length() - 4) + "ld";
+      save_file = obj_file.substring(0, obj_file.length() - 4) + "objl";
+    } else{
+      label_file = obj_file.substring(0, obj_file.length() - 3) + "ld";
+      save_file = obj_file.substring(0, obj_file.length() - 3) + "objl";
+    }
+    loadFiles();
+  }
 }
